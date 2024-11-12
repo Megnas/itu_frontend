@@ -1,24 +1,50 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import FuncSelector from "./components/FuncSelector"
+import Scheduler from './components/Scheduler';
+import People from './components/People';
+import Pubs from './components/Pubs';
+import Beers from './components/Beers';
+import useFetchData from './components/useFetchData';
+
+interface User {
+  id: number;
+  username: string;
+  password_hash: string;
+  blacklisted_pubs: number[];
+  timetable: number[];
+  meeting: number[];
+}
+
+interface ApiResponse {
+  user: User;
+}
 
 function App() {
+  const { data, loading, error } = useFetchData<ApiResponse>("/user?username=testuser");
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+      return <div>Error: {typeof error === "string" ? error : "Error fetching data"}</div>;
+  }
+
+  console.log("Fetched data:", data);
+
+  const routes = {
+    "/" : {label: "Home", component: <div>Welcome to the App!</div>},
+    "/calendar" : {label: "Calendar", component: <Scheduler/>},
+    "/people" : {label: "People", component: <People id={data?.user.id ?? 0}/>},
+    "/beers" : {label: "Beers", component: <Beers/>},
+    "/pubs" : {label: "Pubs", component: <Pubs id={data?.user.id ?? 0}/>},
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <FuncSelector routes = {routes}/>
     </div>
   );
 }

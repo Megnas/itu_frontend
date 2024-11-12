@@ -1,0 +1,22 @@
+.navbar {
+    background-color: black;
+    display: flex;
+    justify-content: center;
+}
+
+.navbar-item {
+    text-align: center;
+    color: white;
+    padding: 18px 24px;
+    text-decoration: none;
+    width: 120px;
+}
+
+.navbar-item:hover {
+    background-color: #ddd;
+    color: black;
+}
+
+.app-container {
+    height: 100%;
+}

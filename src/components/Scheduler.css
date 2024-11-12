@@ -1,0 +1,21 @@
+.scheduler-block{
+    position: absolute;
+    top: 0px;
+    left: 1000px;
+    background-color: #66b3ff;
+    border: 1px solid #3399ff;
+    cursor: pointer;
+}
+
+.week-selector {
+    background-color: gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    margin: 10px;
+}
+
+.timetable{
+    background-color: gray;
+}
