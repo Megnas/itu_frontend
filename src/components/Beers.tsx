@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useFetchData from './useFetchData';
+import './Beers.css'
 
 interface Beer {
     id: number;
@@ -45,12 +46,43 @@ const Beers: React.FC = () => {
                 style={{ marginBottom: '20px', padding: '8px', fontSize: '16px' }}
             />
             <ul>
+            <li key={-1} className='beer-holder'>
+                <div className='beer-instance'>
+                    <div className='column'> Name </div>
+                    <div className='column'> Degree  </div>
+                    <button style={{height: "0px"}}></button>
+                </div>
+                
+            </li>
                 {filteredBeers?.map((beer) => (
-                    <li key={beer.id}>{beer.name} | {beer.degree} | {beer.info}</li>
+                    <BeerInstance beer={beer}/>
                 ))}
             </ul>
         </div>
     );
 };
+
+const BeerInstance: React.FC<{beer: Beer}> = ({ beer }) => {
+    const [wantMore, setWantMore] = useState(false);
+
+    const handleMore = () => {
+        setWantMore((wantMore) => !wantMore);
+    };
+
+    return(
+        <li key={beer.id} className='beer-holder'>
+            <div className='beer-instance'>
+                <div className='column'> {beer.name} </div>
+                <div className='column'> {beer.degree} </div>
+                <button onClick={handleMore}>{wantMore ? "Hide" : "More"}</button>
+            </div>
+            {wantMore &&
+                <div className='beer-instance'>
+                    <div className='column'> {beer.info} </div>
+                </div>
+            }
+        </li>
+    );
+}
 
 export default Beers;

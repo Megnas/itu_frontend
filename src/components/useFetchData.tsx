@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 interface UseLoadDataResult<T> {
   data: T | null;
   loading: boolean;
-  error: string | Record<string, any> | null; // Adjust as needed for your error shape
+  error: string | null; // Adjust as needed for your error shape
 }
 
 const useFetchData = <T,>(endpoint: string, dependencies: any[] = []): UseLoadDataResult<T> => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | Record<string, any> | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const apiUrl = process.env.REACT_APP_API_URL;
 

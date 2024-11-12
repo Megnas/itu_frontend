@@ -1,0 +1,20 @@
+.beer-holder {
+    background-color: gray;
+    width: 100%;
+    margin: 10px;
+ }
+ 
+ .beer-instance {
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+ }
+ 
+ .column {
+     width: 30%;
+     margin: 5px;
+     text-align: left;
+     font-size: 25px;
+     font-weight: bold;
+ }

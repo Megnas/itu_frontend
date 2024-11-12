@@ -18,11 +18,12 @@ export interface TimeBlocks {
 
 const TimeTable: React.FC<{
     blocks: TimeBlockPosition[], 
+    meetingBlock: TimeBlockPosition[],
     state: SchedulerState, 
     setSchedulerState: (state: SchedulerState) => void,
     editBlock: TimeBlockPosition | null,
     setEditBlock: (block: TimeBlockPosition) => void
-}> = ( { blocks, state, setSchedulerState, editBlock, setEditBlock } ) => {
+}> = ( { blocks, meetingBlock, state, setSchedulerState, editBlock, setEditBlock } ) => {
     const divRef = useRef<HTMLDivElement | null>(null);
 
     const handleClick = (event: React.MouseEvent) => {
@@ -93,6 +94,9 @@ const TimeTable: React.FC<{
             </table>
                 {blocks.map( block => (
                     <TimeBlock timeblock={block} color='red'/>
+                ))}
+                {meetingBlock.map( block => (
+                    <TimeBlock timeblock={block} color='blue'/>
                 ))}
                 {editBlock != null &&
                     <TimeBlock timeblock={editBlock} color='green'/>

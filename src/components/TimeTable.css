@@ -1,7 +1,7 @@
 .timetable {
     margin: 10px;
     display: flex;
-    max-width: 100%; /* Ensure it does not overflow horizontally */
+    max-width: 100%;
     overflow: auto;
 }
 
@@ -32,13 +32,16 @@ td, th {
 }
 
 .timetable-container {
-    position: relative; /* To allow the absolute positioning of the overlay */
+    position: relative; 
     overflow: auto;
 }
 
 .overlay-div {
     position: absolute;
-    background-color: rgba(255, 255, 255, 1); /* Example of a semi-transparent overlay */
-    z-index: 10; /* Makes sure it's on top */
+    background-color: rgba(255, 255, 255, 1);
+    z-index: 10;
     pointer-events: none; /* Ensures the overlay doesn't interfere with table interaction */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }

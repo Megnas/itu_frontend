@@ -23,6 +23,10 @@ const People: React.FC<UserData> = ({id}) => {
         setFilter(event.target.value);
     };
 
+    const filteredUsers = users.data?.users.filter((user) =>
+        user.username.toLowerCase().includes(filter.toLowerCase())
+    );
+
     if (users.error) {
         return <div>Error: {typeof users.error === "string" ? users.error : "Error fetching data"}</div>;
     }
@@ -38,7 +42,7 @@ const People: React.FC<UserData> = ({id}) => {
                 style={{ marginBottom: '20px', padding: '8px', fontSize: '16px' }} />
             <p>Loading: {users.loading ? "Loading" : "Done"}</p>
             <ul>
-                {users.data?.users.map((user) => (
+                {filteredUsers?.map((user) => (
                     user.id != id && //Do not display current user
                     <UserInstance user={user} id={id}/>
                 ))}

@@ -19,3 +19,7 @@
 .timetable{
     background-color: gray;
 }
+
+.big-button {
+    width: 300px;
+}

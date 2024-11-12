@@ -36,7 +36,7 @@ function App() {
 
   const routes = {
     "/" : {label: "Home", component: <div>Welcome to the App!</div>},
-    "/calendar" : {label: "Calendar", component: <Scheduler/>},
+    "/calendar" : {label: "Calendar", component: <Scheduler id={data?.user.id ?? 0}/>},
     "/people" : {label: "People", component: <People id={data?.user.id ?? 0}/>},
     "/beers" : {label: "Beers", component: <Beers/>},
     "/pubs" : {label: "Pubs", component: <Pubs id={data?.user.id ?? 0}/>},
