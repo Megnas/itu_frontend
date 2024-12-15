@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import './TimeTable.css'
 import { SchedulerState } from './SchedulerState';
+import { Console } from 'console';
+import React from 'react';
 
 const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const timeSlots = ['12:00 AM', '1:00 AM', '2:00 AM', '3:00 AM', '4:00 AM', '5:00 AM', '6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM',  '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM', '9:00 PM', '10:00 PM',  '11:00 PM'];
@@ -108,16 +110,82 @@ const TimeTable: React.FC<{
 };
 
 const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string}> = ({ timeblock, color }) => {
-    if(timeblock.start >= timeblock.end || 0 > timeblock.start || 0 > timeblock.end || timeblock.start > 96 || timeblock.end > 96 || timeblock.day < 0 || timeblock.day > 6){
-        return(
-            <></>
+    const [isResizing, setIsResizing] = useState(false);
+    const [currentEnd, setCurrentEnd] = useState(timeblock.end); // Resizable end time
+
+    const isValidTimeBlock = (): boolean => {
+        return (
+          timeblock.start < timeblock.end &&
+          timeblock.start >= 0 &&
+          timeblock.end <= 96 &&
+          timeblock.day >= 0 &&
+          timeblock.day <= 6
         );
-    }
+      };
 
     const top = 55 + 52 * timeblock.day; //55 offset, 52 to move to anoter day
     const left = 3 + timeblock.start * 20 + Math.floor(timeblock.start / 4) * 2; //3 offset, 82 to move to another hour, 20 by quater hour, 2 for blank
     const width = 0 + 20 * (timeblock.end - timeblock.start) + (Math.floor((timeblock.end - timeblock.start - 1) / 4)) * 2; // 80 block size, 2 black space
     const height = 50; // 50 height
+
+    // Handlers for resizing
+    const handleMouseDown = (event: React.MouseEvent) => {
+        setIsResizing(true);
+        console.log("mouse down");
+        event.stopPropagation(); // Prevent other event triggers
+    };
+
+    const handleMouseMove = (event: MouseEvent) => {
+        if (!isResizing) return;
+    
+        // Calculate new end time based on mouse position
+        const boundingRect = (event.target as HTMLElement).parentElement?.getBoundingClientRect();
+        if (!boundingRect) return;
+    
+        const deltaX = event.clientX - boundingRect.left;
+        const newEnd = Math.min(
+          Math.max(timeblock.start + Math.floor(deltaX / 20), timeblock.start + 1),
+          96
+        );
+    
+        setCurrentEnd(newEnd);
+        console.log("Current end", event.clientX);
+      };
+
+    const handleMouseUp = () => {
+        if (isResizing) {
+            console.log("mouse up");
+          setIsResizing(false);
+    
+          //TODO: CALL BACK
+          // Trigger the resize callback
+          //if (onResize) {
+          //  onResize({ ...timeblock, end: currentEnd });
+          //}
+        }
+      };
+
+
+     // Attach mousemove and mouseup events globally
+    React.useEffect(() => {
+        if (isResizing) {
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+        } else {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        }
+
+        return () => {
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        };
+    }, [isResizing]);
+    
+    if (!isValidTimeBlock()) {
+        console.warn("Invalid timeblock:", timeblock);
+        return null;
+    }
 
     return(
         <div className="overlay-div"
@@ -125,7 +193,20 @@ const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string}> = ({ t
                 top: `${top}px`, left: `${left}px`, width: `${width}px`, height: `${height}px` , backgroundColor: color
             }}
         >
-            {timeblock.name}
+            <span style={{userSelect: 'none'}}>{timeblock.name}</span>
+            <div
+            style={{
+            width: "8px",
+            height: "100%",
+            backgroundColor: "#fff",
+            cursor: "ew-resize",
+            position: "absolute",
+            pointerEvents: "all",
+            right: 0,
+            top: 0,
+            }}
+            onMouseDown={handleMouseDown}
+            ></div>
         </div>
     );
 };

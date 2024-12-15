@@ -8,6 +8,7 @@ import { SchedulerState } from "./SchedulerState";
 import TimeSelector from "./TimeSelector";
 import Dropdown from "./DropDown";
 import usePostRequest from "./usePostRequest";
+import usePutRequest from "./usePutRequest";
 
 interface TimeBlockPosition {
     start: number;
@@ -85,7 +86,9 @@ function formatToISODate2(currentWeekDate: Date, totalMinutes: number, dayOffset
 
     // Apply the day offset
     const targetDate = new Date(startOfWeek);
-    targetDate.setDate(startOfWeek.getDate() + dayOffset);
+    console.log("Day Offset", dayOffset);
+    console.log("Get Date Value", startOfWeek.getDate());
+    targetDate.setDate(startOfWeek.getDate() + dayOffset + 1);
     console.log("Week Targer", targetDate);
 
     // Calculate hours and minutes from totalMinutes
@@ -111,6 +114,7 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
     const formateDate = format(selectedWeekStart, "yyyy-MM-dd");
 
     const postRequest = usePostRequest("/meeting");
+    const putRequest = usePutRequest("");
     const timeTableResponse = useFetchData<TimetableResponse>(`/user_busy?user_id=${id}&date=${formateDate}`, [postRequest.response]);
     const timeTableMeetingResponse = useFetchData<MeetingResponse>(`/meeting?user_id=${id}&date=${formateDate}`, [postRequest.response]);
     const pubs = useFetchData<PubList>("/pub");
@@ -122,7 +126,7 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
         const beginTime = parseISO(item.begin); // Parse the begin time into a Date object
         const endTime = parseISO(item.end); // Parse the end time into a Date object
 
-        const day = getDay(beginTime); // Get the day of the week (0 = Sunday, 1 = Monday, etc.)
+        const day = getDay(beginTime) == 0 ? 6 : getDay(beginTime) - 1; // Get the day of the week (0 = Sunday, 1 = Monday, etc.)
 
         const startHour = beginTime.getHours() * 4 + Math.floor(beginTime.getMinutes() / 15); // Extract the hour from begin time
         const endHour = endTime.getHours() * 4 + Math.floor(beginTime.getMinutes() / 15); // Extract the hour from end time
@@ -139,7 +143,7 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
         const beginTime = parseISO(item.begin); // Parse the begin time into a Date object
         const endTime = parseISO(item.end); // Parse the end time into a Date object
 
-        const day = getDay(beginTime); // Get the day of the week (0 = Sunday, 1 = Monday, etc.)
+        const day = getDay(beginTime) == 0 ? 6 : getDay(beginTime) - 1; // Get the day of the week (0 = Sunday, 1 = Monday, etc.)
 
         const startHour = beginTime.getHours() * 4 + Math.floor(beginTime.getMinutes() / 15); // Extract the hour from begin time
         const endHour = endTime.getHours() * 4 + Math.floor(beginTime.getMinutes() / 15); // Extract the hour from end time
@@ -235,9 +239,9 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
                     <p>Select pub</p>
                     <Dropdown options={pubDictBlacklisted} onSelect={handleSelect} />
                     <p>Start: </p>
-                    <TimeSelector default_time={b_start} on_change={HandleStartChange}/>
+                    <TimeSelector default_time={b_start} on_change={HandleStartChange} ending_timer={false}/>
                     <p>End: </p>
-                    <TimeSelector default_time={b_end} on_change={HandleEndChange}/>
+                    <TimeSelector default_time={b_end} on_change={HandleEndChange} ending_timer={true}/>
                     <p></p>
                     <button onClick={HandleDone} className="big-button">Done</button>
                 </>

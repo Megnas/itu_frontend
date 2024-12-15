@@ -13,11 +13,17 @@ table, th, td {
 td, th {
     white-space: nowrap;
     text-overflow: ellipsis;
+    padding: 1px;
 }
+
 
 .table-container {
     width: 76px;
     height: 46px;
+    max-width: 76px;
+    max-height: 46px;
+    border-collapse:initial;
+    border-spacing: 2px 2px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,6 +46,7 @@ td, th {
     position: absolute;
     background-color: rgba(255, 255, 255, 1);
     z-index: 10;
+    user-select: none;
     pointer-events: none; /* Ensures the overlay doesn't interfere with table interaction */
     display: flex;
     justify-content: center;
