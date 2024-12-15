@@ -4,7 +4,7 @@ interface UsePostRequestResult<T, D> {
   response: T | null;
   error: string | null;
   loading: boolean;
-  sendPostRequest: (data: D) => Promise<void>;
+  sendPostRequest: (data: D, callback?: (response: T | null, error: string | null) => void) => Promise<void>;
 }
 
 const usePostRequest = <T, D = any>(endpoint: string): UsePostRequestResult<T, D> => {
@@ -14,7 +14,7 @@ const usePostRequest = <T, D = any>(endpoint: string): UsePostRequestResult<T, D
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  const sendPostRequest = async (data: D): Promise<void> => {
+  const sendPostRequest = async (data: D, callback?: (response: T | null, error: string | null) => void): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
@@ -32,8 +32,16 @@ const usePostRequest = <T, D = any>(endpoint: string): UsePostRequestResult<T, D
 
       const result: T = await res.json();
       setResponse(result); // Set the response data
+
+      if (callback) {
+        callback(result, null); // No error, passing response
+      }
     } catch (err: unknown) {
       setError((err as Error).message || "An error occurred");
+
+      if (callback) {
+        callback(null, (err as Error).message || "An error occurred"); // Passing error message
+      }
     } finally {
       setLoading(false);
     }

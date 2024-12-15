@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { min } from 'date-fns';
+import React, { useEffect, useState } from 'react';
 
 const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number) => void, ending_timer: boolean}> = ({ default_time, on_change, ending_timer}) => {
   const default_h = Math.floor(default_time / 60);
@@ -8,9 +9,18 @@ const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number)
   // Function to handle input changes (manual time input)
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setTime(event.target.value);
-    const [hours, minutes] = time.split(':').map(Number);
-    on_change(hours * 60 + minutes);
   };
+
+  useEffect(() => {
+    const [hours, minutes] = time.split(':').map(Number);
+    console.log("Making Callback", hours, minutes)
+    if(ending_timer) {
+      on_change((hours === 0 ? 24 : hours) * 60 + minutes);
+    }
+    else {
+      on_change(hours * 60 + minutes);
+    }
+  }, [time]);
 
   // Function to handle incrementing the time by 15 minutes
   const incrementTime = () => {
@@ -33,12 +43,10 @@ const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number)
     if(ending_timer){
       const formattedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
       setTime(formattedTime);
-      on_change((newHours === 0 ? 24 : newHours) * 60 + newMinutes);
     }
     else {
       const formattedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
       setTime(formattedTime);
-      on_change(newHours * 60 + newMinutes);
     }
   };
 
@@ -66,7 +74,6 @@ const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number)
 
     const formattedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
     setTime(formattedTime);
-    on_change(newHours * 60 + newMinutes);
   };
 
   return (

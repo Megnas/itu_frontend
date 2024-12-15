@@ -11,7 +11,9 @@ interface TimeBlockPosition {
     start: number;
     end: number;
     day: number;
-    name: string
+    name: string;
+    type: number;
+    id: number;
 }
 
 export interface TimeBlocks {
@@ -20,12 +22,11 @@ export interface TimeBlocks {
 
 const TimeTable: React.FC<{
     blocks: TimeBlockPosition[], 
-    meetingBlock: TimeBlockPosition[],
     state: SchedulerState, 
-    setSchedulerState: (state: SchedulerState) => void,
-    editBlock: TimeBlockPosition | null,
-    setEditBlock: (block: TimeBlockPosition) => void
-}> = ( { blocks, meetingBlock, state, setSchedulerState, editBlock, setEditBlock } ) => {
+    createNewBlockCallback: (block: TimeBlockPosition) => void,
+    selectBlockCallback: (block: TimeBlockPosition) => void,
+    selected_id: number,
+}> = ( { blocks, state, createNewBlockCallback, selectBlockCallback, selected_id } ) => {
     const divRef = useRef<HTMLDivElement | null>(null);
 
     const handleClick = (event: React.MouseEvent) => {
@@ -45,12 +46,13 @@ const TimeTable: React.FC<{
 
             console.log(`Click position relative to the div: day: ${day} start: ${start}`);
 
-            setSchedulerState(SchedulerState.editNewEvent);
-            setEditBlock({
+            createNewBlockCallback({
                 start : start,
                 end : start + 4,
                 day: day,
-                name: "Edit Block"
+                name: "Edit Block",
+                type: 1,
+                id: -1
             });
         }
       };
@@ -95,21 +97,15 @@ const TimeTable: React.FC<{
                 
             </table>
                 {blocks.map( block => (
-                    <TimeBlock timeblock={block} color='red'/>
+                    <TimeBlock timeblock={block} color={block.type == 0 ? "red" : "blue"} selectBlockCallback={selectBlockCallback} selected_id={selected_id} key={`${block.id}-${block.type}`}/>
                 ))}
-                {meetingBlock.map( block => (
-                    <TimeBlock timeblock={block} color='blue'/>
-                ))}
-                {editBlock != null &&
-                    <TimeBlock timeblock={editBlock} color='green'/>
-                }
             </div>
             </div>
         </div>
     );
 };
 
-const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string}> = ({ timeblock, color }) => {
+const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string, selectBlockCallback: (block: TimeBlockPosition) => void, selected_id: number}> = ({ timeblock, color, selectBlockCallback, selected_id}) => {
     const [isResizing, setIsResizing] = useState(false);
     const [currentEnd, setCurrentEnd] = useState(timeblock.end); // Resizable end time
 
@@ -127,7 +123,7 @@ const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string}> = ({ t
     const left = 3 + timeblock.start * 20 + Math.floor(timeblock.start / 4) * 2; //3 offset, 82 to move to another hour, 20 by quater hour, 2 for blank
     const width = 0 + 20 * (timeblock.end - timeblock.start) + (Math.floor((timeblock.end - timeblock.start - 1) / 4)) * 2; // 80 block size, 2 black space
     const height = 50; // 50 height
-
+    
     // Handlers for resizing
     const handleMouseDown = (event: React.MouseEvent) => {
         setIsResizing(true);
@@ -187,13 +183,19 @@ const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string}> = ({ t
         return null;
     }
 
+    const handleMouse = () => {
+        selectBlockCallback(timeblock);
+    }
+
     return(
         <div className="overlay-div"
             style={{
                 top: `${top}px`, left: `${left}px`, width: `${width}px`, height: `${height}px` , backgroundColor: color
             }}
+            onMouseDown={handleMouse}
         >
             <span style={{userSelect: 'none'}}>{timeblock.name}</span>
+            {timeblock.id == selected_id &&
             <div
             style={{
             width: "8px",
@@ -205,8 +207,9 @@ const TimeBlock: React.FC<{timeblock : TimeBlockPosition, color: string}> = ({ t
             right: 0,
             top: 0,
             }}
-            onMouseDown={handleMouseDown}
+            //onMouseDown={handleMouseDown}
             ></div>
+            }
         </div>
     );
 };
