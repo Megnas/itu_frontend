@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import { min } from 'date-fns';
 import React, { useEffect, useState } from 'react';
 
@@ -6,21 +9,25 @@ const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number)
   const default_m = default_time % 60;
   const [time, setTime] = useState<string>(`${String(default_h).padStart(2, '0')}:${String(default_m).padStart(2, '0')}`);
 
-  // Function to handle input changes (manual time input)
-  const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setTime(event.target.value);
-  };
+  useEffect(()=> {
+      setTime(`${String(default_h).padStart(2, '0')}:${String(default_m).padStart(2, '0')}`)
+  }, [default_time]);
 
-  useEffect(() => {
-    const [hours, minutes] = time.split(':').map(Number);
-    console.log("Making Callback", hours, minutes)
+  const makeCallback = (specified_time: string) => {
+    const [hours, minutes] = specified_time.split(':').map(Number);
     if(ending_timer) {
       on_change((hours === 0 ? 24 : hours) * 60 + minutes);
     }
     else {
       on_change(hours * 60 + minutes);
     }
-  }, [time]);
+  }
+
+  // Function to handle input changes (manual time input)
+  const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTime(event.target.value);
+    makeCallback(event.target.value);
+  };
 
   // Function to handle incrementing the time by 15 minutes
   const incrementTime = () => {
@@ -43,10 +50,12 @@ const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number)
     if(ending_timer){
       const formattedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
       setTime(formattedTime);
+      makeCallback(formattedTime);
     }
     else {
       const formattedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
       setTime(formattedTime);
+      makeCallback(formattedTime);
     }
   };
 
@@ -74,6 +83,7 @@ const TimeSelector: React.FC<{default_time: number, on_change: (minutes: number)
 
     const formattedTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
     setTime(formattedTime);
+    makeCallback(formattedTime);
   };
 
   return (

@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
@@ -22,7 +25,7 @@ interface ApiResponse {
 }
 
 function App() {
-  const { data, loading, error } = useFetchData<ApiResponse>("/user?username=testuser");
+  const { data, loading, error } = useFetchData<ApiResponse>("/user?username=testuser"); //testuser //Sheila%20Myers
 
   if (loading) {
     return <div>Loading...</div>;

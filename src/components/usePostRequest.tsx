@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import { useState } from "react";
 
 interface UsePostRequestResult<T, D> {

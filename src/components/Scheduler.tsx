@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import "./Scheduler.css"
 import TimeTable, { TimeBlocks } from "./TimeTable";
 import useFetchData from "./useFetchData";
@@ -9,6 +12,7 @@ import TimeSelector from "./TimeSelector";
 import Dropdown from "./DropDown";
 import usePostRequest from "./usePostRequest";
 import usePutRequest from "./usePutRequest";
+import useDeleteRequest from "./useDeleteRequest";
 
 interface TimeBlockPosition {
     start: number;
@@ -119,8 +123,10 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
     //API Calls
     const postRequest = usePostRequest<any, any>("/meeting");
     const putRequest = usePutRequest(`/meeting/${selectedBlockID.id}`);
+    const deleteRequest = useDeleteRequest(`/meeting`);
     const timeTableResponse = useFetchData<TimetableResponse>(`/user_busy?user_id=${id}&date=${formateDate}`, [postRequest.response, putRequest.response]);
-    const timeTableMeetingResponse = useFetchData<MeetingResponse>(`/meeting?user_id=${id}&date=${formateDate}`, [postRequest.response, putRequest.response]);
+    const timeTableMeetingResponse = useFetchData<MeetingResponse>(`/meeting?owner_id=${id}&date=${formateDate}`, [postRequest.response, putRequest.response, deleteRequest.status]);
+    const timeTableMeetingParticipantResponse = useFetchData<MeetingResponse>(`/meeting_participant?user_id=${id}&date=${formateDate}`, [postRequest.response, putRequest.response]);
     const pubs = useFetchData<PubList>("/pub");
 
     //Black list bubs
@@ -173,9 +179,34 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
         });
     }, [timeTableMeetingResponse.data, pubDict]); // Dependencies for memoization
 
-    const AllBlocks = [...busyBlock, ...meetingBlock];
+    //Parsing Meet Block Data
+    const meetingParticipantBlock = useMemo(() => {
+        if (!timeTableMeetingParticipantResponse.data) return [];
+        return timeTableMeetingParticipantResponse.data.meetings.map(item => {
+            const beginTime = parseISO(item.begin); // Parse the begin time into a Date object
+            const endTime = parseISO(item.end); // Parse the end time into a Date object
+    
+            const day = getDay(beginTime) === 0 ? 6 : getDay(beginTime) - 1; // Get the day of the week (0 = Sunday, 1 = Monday, etc.)
+    
+            const startHour = beginTime.getHours() * 4 + Math.floor(beginTime.getMinutes() / 15); // Extract the hour from begin time
+            const endHour = endTime.getHours() * 4 + Math.floor(endTime.getMinutes() / 15); // Extract the hour from end time
+    
+            return {
+                start: startHour,
+                end: endHour,
+                day: day,
+                name: pubDict[item.pub_id],
+                type: 2,
+                id: item.id,
+            };
+        });
+    }, [timeTableMeetingParticipantResponse.data, pubDict]); // Dependencies for memoization
+
+    const AllBlocks = [...busyBlock, ...meetingBlock, ...meetingParticipantBlock];
     const currentTimeBlock = AllBlocks.find(obj => (obj.id === selectedBlockID.id && obj.type === selectedBlockID.type));
+    const currentMeeting = timeTableMeetingResponse.data?.meetings.find(obj => (obj.id === selectedBlockID.id));
     console.log("Time block info", currentTimeBlock?.start, currentTimeBlock?.end)
+    console.log("Meeting Info", currentMeeting?.pub_id)
 
     //Handling Errors
     if(pubs.error){
@@ -270,11 +301,38 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
         console.log("Cannot Create Block");
     }
 
+    const HandleChangeInSizeCallback = (called_block: TimeBlockPosition, start: boolean, change: number) => {
+        if(start){
+            putRequest.sendPutRequest({begin: formatToISODate2(selectedWeekStart, (called_block.start + change) * 15, called_block.day)});
+        }
+        else {
+            putRequest.sendPutRequest({end: formatToISODate2(selectedWeekStart, (called_block.end + change) * 15, called_block.day)});
+        }
+    }
+
+    const HandleDeselectCallback = () => {
+        SetSchedulerStateFunc(SchedulerState.default)
+    }
+
+    const HandleRemove = () => {
+        deleteRequest.handleDelete(`/${selectedBlockID.id}`);
+        SetSchedulerStateFunc(SchedulerState.default);
+    }
+
     return(
         <div>
             <WeekSelector onWeekChange={handleWeekChange}/>
             <p>Loading: {(timeTableResponse.loading || timeTableMeetingResponse.loading || pubs.loading || putRequest.loading) ? "Loading" : "Done"}</p>
-            <TimeTable state={schedulerState} createNewBlockCallback={HandleNewBlockCallback} blocks={AllBlocks} selectBlockCallback={handleBlockSelectCallback} selected_id={schedulerState == SchedulerState.editNewEvent ? selectedBlockID.id : -1}/>
+            <TimeTable 
+                state={schedulerState} 
+                createNewBlockCallback={HandleNewBlockCallback} 
+                blocks={AllBlocks} 
+                selectBlockCallback={handleBlockSelectCallback} 
+                selected_id={schedulerState == SchedulerState.editNewEvent ? selectedBlockID.id : -1} 
+                deselectBlockCallback={HandleDeselectCallback}
+                changeSizeCallBack={HandleChangeInSizeCallback}
+                changeStateCallback={SetSchedulerStateFunc}
+            />
             <div>
             {schedulerState == SchedulerState.default &&
                 <button onClick={() => SetSchedulerStateFunc(SchedulerState.createNewEvent)} className="big-button">New Meeting</button>
@@ -282,12 +340,13 @@ const Scheduler: React.FC<{id: number}> = ({ id }) => {
             {schedulerState == SchedulerState.editNewEvent &&
                 <>
                     <p>Select pub</p>
-                    <Dropdown options={pubDictBlacklisted} onSelect={handlePubSelect} />
+                    <Dropdown options={pubDictBlacklisted} onSelect={handlePubSelect} selected={currentMeeting? currentMeeting.pub_id : -1}/>
                     <p>Start: </p>
                     <TimeSelector default_time={currentTimeBlock? (currentTimeBlock.start * 15) : 0} on_change={HandleStartChange} ending_timer={false}/>
                     <p>End: </p>
                     <TimeSelector default_time={currentTimeBlock? (currentTimeBlock.end * 15) : 0} on_change={HandleEndChange} ending_timer={true}/>
                     <p></p>
+                    <button onClick={HandleRemove} className="big-button" style={{backgroundColor: "red"}}>REMOVE</button>
                     <button onClick={HandleDone} className="big-button">Done</button>
                 </>
             }

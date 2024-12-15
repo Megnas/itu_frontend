@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import { useState, useEffect } from "react";
 
 interface UseLoadDataResult<T> {
@@ -25,10 +28,11 @@ const useFetchData = <T,>(endpoint: string, dependencies: any[] = []): UseLoadDa
 
     const fetchData = async () => {
       setError(null);
-      setData(null);
+      //setData(null);
       setLoading(true);
 
       try {
+        console.log("FETCH DATA", `${apiUrl}${endpoint}`);
         const response = await fetch(`${apiUrl}${endpoint}`, { signal });
         if (!response.ok) {
           throw await response.json();

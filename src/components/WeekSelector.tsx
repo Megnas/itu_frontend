@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import React, { useEffect, useState } from "react";
 import { format, startOfWeek, addWeeks, endOfWeek } from "date-fns";
 

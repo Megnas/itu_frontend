@@ -1,5 +1,9 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import React, { useState, useEffect } from 'react';
 import useFetchData from './useFetchData';
+import StarRating from './StarRating';
 import './Beers.css'
 
 interface Beer {
@@ -48,9 +52,9 @@ const Beers: React.FC = () => {
             <ul>
             <li key={-1} className='beer-holder'>
                 <div className='beer-instance'>
-                    <div className='column'> Name </div>
-                    <div className='column'> Degree  </div>
-                    <button style={{height: "0px"}}></button>
+                    <div className='column' style={{textAlign: "center"}}> Name </div>
+                    <div className='column' style={{textAlign: "center"}}> Degree  </div>
+                    <div className='column' style={{textAlign: "center"}}> Rating  </div>
                 </div>
                 
             </li>
@@ -74,6 +78,9 @@ const BeerInstance: React.FC<{beer: Beer}> = ({ beer }) => {
             <div className='beer-instance'>
                 <div className='column'> {beer.name} </div>
                 <div className='column'> {beer.degree} </div>
+                <StarRating onRatingChange={function (rating: number): void {
+                    
+                } }/>
                 <button onClick={handleMore}>{wantMore ? "Hide" : "More"}</button>
             </div>
             {wantMore &&

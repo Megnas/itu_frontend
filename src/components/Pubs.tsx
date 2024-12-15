@@ -1,3 +1,6 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
 import React, { useState, useEffect } from 'react';
 import useFetchData from './useFetchData';
 import './Pubs.css'

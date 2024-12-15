@@ -3,26 +3,26 @@
 
 import { useState } from "react";
 
-interface UsePutRequestResult<T, D> {
+interface UsePutRequestCnstResult<T, D> {
   response: T | null;
   error: string | null;
   loading: boolean;
-  sendPutRequest: (data: D) => Promise<void>;
+  sendPutRequestCnst: (specific_endpoint: string, data: D) => Promise<void>;
 }
 
-const usePutRequest = <T, D = any>(endpoint: string): UsePutRequestResult<T, D> => {
+const usePutRequestCnst = <T, D = any>(endpoint: string): UsePutRequestCnstResult<T, D> => {
   const [response, setResponse] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
   const apiUrl = process.env.REACT_APP_API_URL;
 
-  const sendPutRequest = async (data: D): Promise<void> => {
+  const sendPutRequestCnst = async (specific_endpoint: string, data: D): Promise<void> => {
     console.log("Making PUT Request", data)
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiUrl}${endpoint}`, {
+      const res = await fetch(`${apiUrl}${endpoint}${specific_endpoint}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +43,7 @@ const usePutRequest = <T, D = any>(endpoint: string): UsePutRequestResult<T, D> 
     }
   };
 
-  return { response, error, loading, sendPutRequest };
+  return { response, error, loading, sendPutRequestCnst };
 };
 
-export default usePutRequest;
+export default usePutRequestCnst;

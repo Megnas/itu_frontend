@@ -1,3 +1,7 @@
+//Projekt ITU - Pivní Plánovač
+//Autor: Dominik Václavík
+
+
 interface QueryParams {
     [key: string]: string | number;
   }
